@@ -1,0 +1,266 @@
+Trigger
+==> It is a special type of stored procedure that is invoked automatically in response to an event. Each trigger is associated with a table, which is activated on any DML statement such as INSERT, UPDATE, or DELETE.
+==>A trigger is called a special procedure because it cannot be called directly like a stored procedure. 
+==>The main difference between the trigger and procedure is that a trigger is called automatically when a data modification event is made against a table. In contrast, a stored procedure must be called explicitly.
+
+Advantages
+Triggers help us to validate data even before they are inserted or updated.
+Triggers help us to keep a log of records like maintaining audit trails in tables.
+SQL triggers provide an alternative way to check the integrity of data.
+Triggers increases the performance of SQL queries because it does not need to compile each time the query is executed.
+Triggers reduce the client-side code that saves time and effort.
+
+Types of Triggers in MySQL?
+
+We can define the maximum six types of actions or events in the form of triggers:
+
+    Before Insert: It is activated before the insertion of data into the table.
+    After Insert: It is activated after the insertion of data into the table.
+    Before Update: It is activated before the update of data in the table.
+    After Update: It is activated after the update of the data in the table.
+    Before Delete: It is activated before the data is removed from the table.
+    After Delete: It is activated after the deletion of data from the table.
+
+ syntax of creating a trigger in MySQL:
+
+    CREATE TRIGGER trigger_name    
+        (AFTER | BEFORE) (INSERT | UPDATE | DELETE)  
+             ON table_name FOR EACH ROW    
+             BEGIN    
+            --variable declarations    
+            --trigger code    
+            END;     
+
+
+=================================================================
+The trigger body can access the column's values, which are affected by the DML statement. The NEW and OLD modifiers are used to distinguish the column values BEFORE and AFTER the execution of the DML statement. We can use the column name with NEW and OLD modifiers as OLD.col_name and NEW.col_name. The OLD.column_name indicates the column of an existing row before the updation or deletion occurs. NEW.col_name indicates the column of a new row that will be inserted or an existing row after it is updated.
+
+Trigger Event 	OLD 		NEW
+INSERT 		No 		Yes
+UPDATE 		Yes 		Yes
+DELETE 		Yes 		No
+
+
+//BEFORE INSERT
+    
+
+
+DELIMITER $$   
+    CREATE TRIGGER trigger_name BEFORE INSERT  
+    ON table_name FOR EACH ROW  
+    BEGIN  
+       variable declarations  
+       trigger code  
+    END$$  
+    DELIMITER ;  
+
+    CREATE TABLE user1(
+	user_id int primary key,  
+        name varchar(45) NOT NULL,  
+	per_hour_salary int  ,
+        working_hours int  default 0,
+	Total_salary int default 0
+    );  
+
+//Before inserting record,calculate total salary of an employee.
+
+DELIMITER //  
+ Create Trigger before_insert_user 
+BEFORE INSERT
+ ON USER1 FOR EACH ROW  
+BEGIN  
+SET NEW.TOTAL_SALARY=NEW.PER_HOUR_SALARY * NEW.WORKING_HOURS;
+END //  
+DELIMITER ;
+
+
+mysql> insert into user1(user_id,name,per_hour_salary,working_hours) values(3,'SWAPNIL',500,8);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> SELECT * FROM USER1;
++---------+---------+-----------------+---------------+--------------+
+| user_id | name    | per_hour_salary | working_hours | Total_salary |
++---------+---------+-----------------+---------------+--------------+
+|       3 | SWAPNIL |             500 |             8 |         4000 |
++---------+---------+-----------------+---------------+--------------+
+===================================================================================================
+//AFTER INSERT
+
+After Insert Trigger in MySQL is invoked automatically whenever an insert event occurs on the table. 
+    DELIMITER $$   
+    CREATE TRIGGER trigger_name AFTER INSERT  
+    ON table_name FOR EACH ROW  
+    BEGIN  
+       variable declarations  
+       trigger code  
+    END$$  
+    DELIMITER ;  
+
+
+    We can access the NEW values but cannot change them in an AFTER INSERT trigger.
+    We cannot access the OLD If we try to access the OLD values, we will get an error because there is no OLD on the INSERT trigger.
+
+ CREATE TABLE STUdent1(ID INT,NAME VARCHAR(20),AGE INT,COURSEID INT);
+ insert into student1 values(2,'sonal',34,4);
+
+
+we will create a new table named "student_detail" as follows:
+mysql> CREATE TABLE STU_DETAILS(ID INT,NAME VARCHAR(20),AGE INT,COURSEID INT, Lastinsertedtime Time);
+Query OK, 0 rows affected (0.02 sec)
+
+     DELIMITER //  
+     Create Trigger after_insert_details20  
+    AFTER INSERT ON student1 FOR EACH ROW  
+    BEGIN  
+    INSERT INTO stu_details VALUES (new.id, new.name,   
+    new.age, new.courseid, CURTIME());  
+    END //  
+
+=============================================================================
+Before update
+
+DELIMITER //  
+ Create Trigger before_update_user 
+BEFORE update
+ ON USER1 FOR EACH ROW  
+BEGIN  
+SET NEW.TOTAL_SALARY=NEW.PER_HOUR_SALARY * NEW.WORKING_HOURS;
+END //  
+DELIMITER ;
+
+mysql> select * from user1;
++---------+---------+-----------------+---------------+--------------+
+| user_id | name    | per_hour_salary | working_hours | Total_salary |
++---------+---------+-----------------+---------------+--------------+
+|       3 | SWAPNIL |             500 |             8 |         4000 |
++---------+---------+-----------------+---------------+--------------+
+1 row in set (0.00 sec)
+
+mysql> update user1 set working_hours=10 where user_id=3;
+Query OK, 1 row affected (0.01 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> select * from user1;
++---------+---------+-----------------+---------------+--------------+
+| user_id | name    | per_hour_salary | working_hours | Total_salary |
++---------+---------+-----------------+---------------+--------------+
+|       3 | SWAPNIL |             500 |            10 |         5000 |
++---------+---------+-----------------+---------------+--------------+
+1 row in set (0.00 sec)
+==========================================================
+MySQL AFTER UPDATE TRIGGER
+
+CREATE TABLE students_info(    
+    id int NOT NULL AUTO_INCREMENT,    
+    name varchar(45) NOT NULL,    
+    class int NOT NULL,    
+    email_id varchar(65) NOT NULL,    
+    PRIMARY KEY (id)    
+); 
+
+    INSERT INTO students_info (name, class, email_id)     
+    VALUES ('Stephen', 6, 'stephen@javatpoint.com'),   
+    ('Bob', 7, 'bob@javatpoint.com'),   
+    ('Steven', 8, 'steven@javatpoint.com'),   
+    ('Alexandar', 7, 'alexandar@javatpoint.com');  
+
+CREATE TABLE students_log(    
+    user varchar(45) NOT NULL,    
+    descreptions varchar(65) NOT NULL  
+);  
+
+    DELIMITER $$  
+      
+    CREATE TRIGGER after_update_studentsInfo  
+    AFTER UPDATE  
+    ON students_info FOR EACH ROW  
+    BEGIN  
+        INSERT into students_log VALUES (user(),   
+        CONCAT('Update Student Record ', OLD.name, ' Previous Class :',  
+        OLD.class, ' Present Class ', NEW.class));  
+    END $$  
+      
+    DELIMITER ;  
+
+mysql> UPDATE students_info SET class = class + 1;
+Query OK, 4 rows affected (0.01 sec)
+Rows matched: 4  Changed: 4  Warnings: 0
+
+mysql> select * from students_info;
++----+-----------+-------+--------------------------+
+| id | name      | class | email_id                 |
++----+-----------+-------+--------------------------+
+|  1 | Stephen   |     7 | stephen@javatpoint.com   |
+|  2 | Bob       |     8 | bob@javatpoint.com       |
+|  3 | Steven    |     9 | steven@javatpoint.com    |
+|  4 | Alexandar |     8 | alexandar@javatpoint.com |
++----+-----------+-------+--------------------------+
+4 rows in set (0.00 sec)
+======================================================================
+MySQL BEFORE DELETE Trigger
+
+    DELIMITER $$   
+    CREATE TRIGGER trigger_name BEFORE DELETE  
+    ON table_name FOR EACH ROW  
+    BEGIN  
+       variable declarations  
+       trigger code  
+    END$$  
+    DELIMITER ;  
+
+Restrictions
+
+    We can access the OLD rows but cannot update them in a BEFORE DELETE trigger.
+    We cannot access the NEW rows. It is because there are no new row exists.
+
+
+CREATE TABLE salaries (  
+    emp_num INT PRIMARY KEY,  
+    valid_from DATE NOT NULL,  
+    amount DEC(8 , 2 ) NOT NULL DEFAULT 0  
+); 
+
+    INSERT INTO salaries (emp_num, valid_from, amount)  
+    VALUES  
+        (102, '2020-01-10', 45000),  
+        (103, '2020-01-10', 65000),  
+        (105, '2020-01-10', 55000),  
+        (107, '2020-01-10', 70000),  
+        (109, '2020-01-10', 40000);  
+
+    CREATE TABLE salary_archives1 (  
+        id INT PRIMARY KEY AUTO_INCREMENT,  
+        emp_num INT,  
+        valid_from DATE NOT NULL,  
+        amount DEC(18 , 2 ) NOT NULL DEFAULT 0,  
+        deleted_time TIMESTAMP DEFAULT NOW()  
+    );  
+
+    DELIMITER $$  
+      
+    CREATE TRIGGER before_delete_salaries1 
+    BEFORE DELETE  
+    ON salaries FOR EACH ROW  
+    BEGIN  
+        INSERT INTO salary_archives (emp_num, valid_from, amount)  
+        VALUES(OLD. emp_num, OLD.valid_from, OLD.amount);  
+    END$$   
+      
+    DELIMITER ; 
+ 
+DELETE FROM salaries WHERE emp_num = 102;  
+ SELECT * FROM salary_archives;  
+
+
+
+DELETE FROM salaries;  
+========================================================
+
+
+
+
+
+
+
+
+

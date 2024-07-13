@@ -1,0 +1,630 @@
+
+Exception Handling:
+~~~~~~~~~~~~~~~~~~~
+=> Exceptions means runtime errors.
+=> Handling these runtime errors inside program is called as exception handling.
+==>When a abnormal condition arises during the execution of a stored procedure, you should handle it properly, such as exiting or continuing the current code block.
+
+To handle a condition, you declare a handler using the DECLARE ... HANDLER statement.
+=> we can handle the exception in mysql by using the following syntax.
+
+syntax
+------
+        DECLARE [continue|exit] HANDLER for [CODE|NAME]
+        BEGIN
+            -------------
+            -------------
+        END;
+
+DECLARE { EXIT | CONTINUE } HANDLER: This declares a handler, instructing whether it should exit or continue the enclosing stored procedure when a specified condition occurs.
+
+    EXIT: The stored procedure will terminate.
+    CONTINUE: The stored procedure will continue execution.
+
+
+
+
+Example1:
+---------
+delimiter ##
+CREATE PROCEDURE exceptionEx001()
+BEGIN
+        select 'pro exe started...';
+        select * from empp;
+        select 'pro exe ended.....';
+END##
+delimiter ;
+call exceptionex001();
++--------------------+
+| pro exe started... |
++--------------------+
+| pro exe started... |
++--------------------+
+1 row in set (0.00 sec)
+
++------+---------+--------+------------+
+| id   | name    | salary | doj        |
++------+---------+--------+------------+
+|    1 | Prakash |   9000 | 2024-01-01 |
+|    2 | Kalyan  |  10000 | 2023-01-04 |
+|    3 | Kiran   |   9900 | 2022-02-22 |
++------+---------+--------+------------+
+3 rows in set (0.00 sec)
+
++--------------------+
+| pro exe ended..... |
++--------------------+
+| pro exe ended..... |
++--------------------+
+1 row in set (0.01 sec)
+
+Query OK, 0 rows affected (0.01 sec)
+
+Example2:
+---------
+delimiter ##
+CREATE  PROCEDURE exceptionEx02()
+BEGIN
+        select 'pro exe started...';
+        select * from empp;
+        select 'pro exe ended.....';
+END ##
+delimiter ;
+
+call exceptionex02();
+
++--------------------+
+| pro exe started... |
++--------------------+
+| pro exe started... |
++--------------------+
+1 row in set (0.00 sec)
+
+ERROR 1146 (42S02): Table 'mysql21.empp' doesn't exist
+
+Example3:
+---------
+delimiter ##
+CREATE PROCEDURE exceptionEx0003()
+BEGIN
+        DECLARE exit HANDLER for 1146
+        BEGIN
+            select 'Check your table name...';
+        END;
+        select 'pro exe started...';
+        select * from empp;
+        select 'pro exe ended.....';
+END ##
+delimiter ;
+
+ call exceptionex0003();
++--------------------+
+| pro exe started... |
++--------------------+
+| pro exe started... |
++--------------------+
+1 row in set (0.00 sec)
+
++--------------------------+
+| Check your table name... |
++--------------------------+
+| Check your table name... |
++--------------------------+
+1 row in set (0.01 sec)
+
++--------------------+
+| pro exe ended..... |
++--------------------+
+| pro exe ended..... |
++--------------------+
+1 row in set (0.01 sec)
+
+Query OK, 0 rows affected (0.01 sec)
+
+Example4:
+---------
+delimiter ##
+CREATE  PROCEDURE exceptionEx04()
+BEGIN
+        DECLARE exit HANDLER for 1146
+        BEGIN
+            select 'Check your table name...';
+        END;
+        select 'pro exe started...';
+        select * from empp;
+        select 'pro exe ended.....';
+END ##
+delimiter ;
+ call exceptionex04();
++--------------------+
+| pro exe started... |
++--------------------+
+| pro exe started... |
++--------------------+
+1 row in set (0.00 sec)
+
++--------------------------+
+| Check your table name... |
++--------------------------+
+| Check your table name... |
++--------------------------+
+1 row in set (0.01 sec)
+
+Query OK, 0 rows affected (0.01 sec)
+
+
+https://dev.mysql.com/doc/mysql-errors/8.0/en/server-error-reference.html
+
+Example5:
+---------
+delimiter ##
+CREATE  PROCEDURE exceptionEx05()
+BEGIN
+        DECLARE continue HANDLER for 1146
+        BEGIN
+            select 'Check your table name...';
+        END;
+        select 'pro exe started...';
+        select name,sal from emp;
+        select 'pro exe ended.....';
+END ##
+delimiter ;
+
+ call exceptionex05();
++--------------------+
+| pro exe started... |
++--------------------+
+| pro exe started... |
++--------------------+
+1 row in set (0.00 sec)
+
+ERROR 1054 (42S22): Unknown column 'sal' in 'field list'
+
+Example 06:
+--------
+delimiter ##
+CREATE  PROCEDURE exceptionEx07()
+BEGIN
+        DECLARE continue HANDLER for 1146
+        BEGIN
+            select 'Check your table name...';
+        END;
+        DECLARE continue HANDLER for 1054
+        BEGIN
+            select 'Check your column name...';
+        END;
+        select 'pro exe started...';
+        select name,sal from emp;
+        select 'pro exe ended.....';
+END ##
+delimiter ;
+
+ call exceptionex07();
++--------------------+
+| pro exe started... |
++--------------------+
+| pro exe started... |
++--------------------+
+1 row in set (0.00 sec)
+
++---------------------------+
+| Check your column name... |
++---------------------------+
+| Check your column name... |
++---------------------------+
+1 row in set (0.01 sec)
+
++--------------------+
+| pro exe ended..... |
++--------------------+
+| pro exe ended..... |
++--------------------+
+1 row in set (0.01 sec)
+
+Query OK, 0 rows affected (0.01 sec)
+
+Example 07:
+--------
+delimiter ##
+CREATE  PROCEDURE exceptionEx06()
+BEGIN
+        DECLARE continue HANDLER for 1146
+        BEGIN
+            select 'Check your table name...';
+        END;
+        DECLARE continue HANDLER for 1054
+        BEGIN
+            select 'Check your column name...';
+        END;
+        select 'pro exe started...';
+        select name,sal from empp;
+        select 'pro exe ended.....';
+END ##
+delimiter ;
+
+call exceptionex06();
+
+mysql> call exceptionex06();
++--------------------+
+| pro exe started... |
++--------------------+
+| pro exe started... |
++--------------------+
+1 row in set (0.00 sec)
+
++--------------------------+
+| Check your table name... |
++--------------------------+
+| Check your table name... |
++--------------------------+
+1 row in set (0.00 sec)
+
++--------------------+
+| pro exe ended..... |
++--------------------+
+| pro exe ended..... |
++--------------------+
+
+
+Example 8:
+---------
+mysql> select * from payments;
+Empty set (0.00 sec)
+
+mysql> select * from fraud;
+Empty set (0.00 sec)
+
+mysql> desc payments;
++-----------+------+------+-----+---------+-------+
+| Field     | Type | Null | Key | Default | Extra |
++-----------+------+------+-----+---------+-------+
+| client_id | int  | YES  |     | NULL    |       |
+| amount    | int  | NO   |     | NULL    |       |
++-----------+------+------+-----+---------+-------+
+2 rows in set (0.00 sec)
+
+mysql> desc fraud;
++-----------+-------------+------+-----+---------+----------------+
+| Field     | Type        | Null | Key | Default | Extra          |
++-----------+-------------+------+-----+---------+----------------+
+| id        | int         | NO   | PRI | NULL    | auto_increment |
+| client_id | int         | YES  |     | NULL    |                |
+| message   | varchar(50) | YES  |     | NULL    |                |
+| tot       | datetime    | YES  |     | NULL    |                |
++-----------+-------------+------+-----+---------+----------------+
+4 rows in set (0.00 sec)
+
+delimiter ##
+CREATE  PROCEDURE makePayment(cid int,amt int)
+BEGIN
+        insert into payments values(cid,amt);
+END ##
+delimiter ;
+ call makePayment(111,10000);
+
+ call makePayment(222,null);
+ERROR 1048 (23000): Column 'amount' cannot be null
+
+
+delimiter ##
+CREATE  PROCEDURE makePayment11(cid int,amt int)
+BEGIN
+        DECLARE CONTINUE HANDLER FOR 1048
+        BEGIN
+            insert into fraud(client_id,message,tot)
+            values(cid,'Invalid Trans...',now());
+        END;
+        insert into payments values(cid,amt);
+END ##
+delimiter ;
+
+call makePayment11(222,7800);
+Query OK, 1 row affected (0.02 sec)
+
+mysql> call makePayment(333,9800);
+Query OK, 1 row affected (0.02 sec)
+
+mysql> call makePayment1(444,null);
+Query OK, 1 row affected (0.02 sec)
+
+mysql> select * from payments;
++-----------+--------+
+| client_id | amount |
++-----------+--------+
+|       111 |   9000 |
+|       222 |   7800 |
+|       333 |   9800 |
++-----------+--------+
+3 rows in set (0.00 sec)
+
+mysql> select * from fraud;
++----+-----------+------------------+---------------------+
+| id | client_id | message          | tot                 |
++----+-----------+------------------+---------------------+
+|  3 |       444 | Invalid Trans... | 2024-05-16 21:32:55 |
++----+-----------+------------------+---------------------+
+1 row in set (0.00 sec)
+==============================================================
+Also known as Error Code: 1062 or ERROR 1062 (23000), the MySQL 1062 error message means a duplicate entry into a unique column or a primary key. 
+
+First, create a table called users:
+
+CREATE TABLE users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(50) NOT NULL
+);
+
+DELIMITER //
+
+CREATE PROCEDURE insert_user01(
+	IN p_username VARCHAR(50), 
+    IN p_email VARCHAR(50)
+)
+BEGIN
+  -- SQLSTATE for unique constraint violation
+  DECLARE EXIT HANDLER FOR 1062  BEGIN
+    -- Handler actions when a duplicate username is detected
+    SELECT 'Error: Duplicate username. Please choose a different username.' AS Message;
+  END;
+
+  -- Attempt to insert the user into the table
+  INSERT INTO users (username, email) VALUES (p_username, p_email);
+
+  -- If the insertion was successful, display a success message
+  SELECT 'User inserted successfully' AS Message;
+
+END //
+
+DELIMITER ;
+
+DELIMITER //
+
+CREATE PROCEDURE insert_user001(
+	IN p_username VARCHAR(50), 
+    IN p_email VARCHAR(50)
+)
+BEGIN
+  -- SQLSTATE for unique constraint violation
+  DECLARE continue HANDLER FOR 1062  BEGIN
+    -- Handler actions when a duplicate username is detected
+    SELECT 'Error: Duplicate username. Please choose a different username.' AS Message;
+  END;
+
+  -- Attempt to insert the user into the table
+  INSERT INTO users (username, email) VALUES (p_username, p_email);
+
+  -- If the insertion was successful, display a success message
+  SELECT 'User inserted successfully' AS Message;
+
+END //
+
+DELIMITER ;
+====================================================================
+CREATE TABLE suppliers (
+    supplier_id INT AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    phone VARCHAR(15) NOT NULL UNIQUE,
+    address VARCHAR(255) NOT NULL,
+    PRIMARY KEY (supplier_id)
+ );
+
+DELIMITER //
+
+CREATE PROCEDURE insert_supplier1(in name1 varchar(255),in phone1 varchar(255),address1 varchar(255)) 
+  
+
+BEGIN
+  -- SQLSTATE for unique constraint violation
+   DECLARE exit HANDLER FOR 1062
+  BEGIN
+    -- Handler actions when a duplicate username is detected
+    SELECT 'Error: shld be unique' as message;
+  END;
+
+  -- Attempt to insert the user into the table
+  INSERT INTO suppliers (name,phone,address) VALUES (name1,phone1,address1);
+
+  -- If the insertion was successful, display a success message
+  SELECT 'User inserted successfully' AS Message;
+
+END //
+
+DELIMITER ;
+
+
+===========================================================================
+
+CURSOR:
+
+==>it is temporary memory/workspace.
+==>Cursor allows you to iterate a set of rows returned by a query and process each row accordingly.
+In MySQL, a cursor allows row-by-row processing of the result sets. A cursor is used for the result set and returned from a query. By using a cursor, you can iterate or step through the results of a query and perform certain operations on each row. The cursor allows you to iterate through the result set and then perform the additional processing only on the rows that require it.
+
+Two types of Cursors
+
+1)Explicit Cursor
+==>These cursors are created by user for fetching a table data in row by row or one by one manner.
+==>An Explicit cursor are holding multiple rows but it can access only one row at a 
+time
+==>If we want to create an explicit cursor then we should follow 4 steps.
+
+1. Declare Cursor
+
+The cursor declaration must come after any variable declaration. If you declare a cursor before the variable declarations, MySQL will issue an error. Additionally, a cursor must always associate with a SELECT statement.
+
+Syntax
+
+    DECLARE cursor_name CURSOR FOR  
+    Select statement;  
+
+2. Open Cursor
+
+After declaring the cursor the next step is to open the cursor using open statement.
+The OPEN statement initializes the result set for the cursor; therefore, you must call the OPEN statement before fetching rows from the result set.
+Syntax
+
+    Open cursor_name; 
+
+3. Fetch Cursor
+
+Retrieve the desired records from a table using the FETCH Statement.
+    FETCH  cursor_name INTO variable_list;  
+
+4. Close Cursor
+
+The final step is to close the cursor.
+
+    Close cursor_name
+=============================================================================
+
+The cursors provided by MySQL are embedded cursors. They are −
+    READ ONLY − Using these cursors you cannot update any table.
+    Non-Scrollable − Using these cursors you can retrieve records from a table in one direction i.e., from top to bottom.
+    Asensitive − These cursors are insensitive to the changes that are made in the table i.e. the modifications done in the table are not reflected in the cursor.
+    Which means if we have created a cursor holding all the records in a table and, meanwhile if we add some more records to the table, these recent changes will not be reflected in the cursor we previously obtained.
+================================================================================
+
+
+syntax:
+Here’s the basic syntax of a cursor:
+
+-- declare a cursor
+DECLARE cursor_name CURSOR FOR 
+SELECT column1, column2 
+FROM your_table 
+WHERE your_condition;
+
+-- open the cursor
+OPEN cursor_name;
+
+FETCH cursor_name INTO variable1, variable2;
+-- process the data
+
+
+-- close the cursor
+CLOSE cursor_name;
+
+==================================================
+When working with MySQL cursor, you must also declare a NOT FOUND handler to manage the situation when the cursor cannot find any row.
+Each time you call the FETCH statement, the cursor attempts to read the next row in the result set. When the cursor reaches the end of the result set, it will not be able to retrieve the data, and a condition is raised. The handler is used to handle this condition.
+
+To declare a NOT FOUND handler, you use the following syntax:
+
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET finished = 1;
+
+The finished is a variable to indicate that the cursor has reached the end of the result set.
+
+****Notice that the handler declaration must appear after the variable and cursor declarations within the stored procedures.
+=================================================================
+Example 1:
+Write a cursor to retrieve id,name and salary of employee
+
+ delimiter ##
+ create procedure curdemo1()
+    begin
+     declare a int;
+     declare b varchar(20);
+    declare c double;
+	declare fetch_complete int default 0;
+     declare mycur cursor for select id,name,salary from emp;
+	declare continue handler for NOT FOUND set fetch_complete=1;
+    open mycur;
+	L:loop
+		 fetch mycur into a,b,c;
+		if fetch_complete=1 then
+		Leave L;
+		end if;
+		select a,b,c;
+	end loop L;
+     close mycur;
+END ##
+
+ call curdemo1();
+===================================================================
+Example 2:
+create cursor to fetch and concat all names of emp
+
+
+ delimiter ##
+ create procedure curdemo200()
+    begin
+     declare a varchar(20);
+     declare res varchar(255) default "";
+	declare fetch_complete int default 0;
+     declare mycur cursor for select name from emp;
+	declare continue handler for NOT FOUND set fetch_complete=1;
+    open mycur;
+	L:loop
+		 fetch mycur into a;
+		if fetch_complete=1 then
+		Leave L;
+		end if;
+		set res=concat(res,a," , ");
+	end loop L;
+	select res as 'NAMES';
+     close mycur;
+END ##
+
+Example 3:
+create a cursor to store one by one record of emp table into another table
+
+ delimiter ##
+ create procedure curdemo4()
+    begin
+     declare a int;
+     declare b varchar(20);
+    declare c char(6);
+   declare d double;
+	declare fetch_complete int default 0;
+     declare mycur cursor for select id,name,gender,sal from Gemp;
+	declare continue handler for NOT FOUND set fetch_complete=1;
+    open mycur;
+	L:loop
+		 fetch mycur into a,b,c,d;
+		if fetch_complete=1 then
+		Leave L;
+		end if;
+		insert into tempemp values(a,b,c,d);		
+	end loop L;
+     close mycur;
+END ##
+
+call curdemo4();
+select * from tempemp;
+
+Example 5:
+write a procedure which will copy only male emp data into another table
+
+delete from tempemp;
+
+delimiter ##
+ create procedure curdemo6()
+    begin
+     declare a int;
+     declare b varchar(20);
+    declare c char(6);
+   declare d double;
+	declare fetch_complete int default 0;
+     declare mycur cursor for select id,name,gender,sal from Gemp;
+	declare continue handler for NOT FOUND set fetch_complete=1;
+    open mycur;
+	L:loop
+		 fetch mycur into a,b,c,d;
+		if fetch_complete=1 then
+		Leave L;
+		end if;
+		if c='male' then
+		insert into tempemp values(a,b,c,d);	
+		end if;	
+	end loop L;
+     close mycur;
+END ##
+
+delimiter ;
+call curdemo6();
+select * from tempemp;
+
+
+ 
+=====================================================================================================
